@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Task" ADD COLUMN     "goalDays" INTEGER NOT NULL DEFAULT 30;

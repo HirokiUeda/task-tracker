@@ -16,6 +16,7 @@ datasource db {
 model Task {
   id          Int          @id @default(autoincrement())
   name        String
+  goalDays    Int          @default(30)
   createdAt   DateTime     @default(now())
   completions Completion[]
 }
@@ -25,4 +26,5 @@ model Completion {
   date   DateTime
   task   Task     @relation(fields: [taskId], references: [id])
   taskId Int
+  @@unique([taskId, date], name: "taskId_date")
 }
