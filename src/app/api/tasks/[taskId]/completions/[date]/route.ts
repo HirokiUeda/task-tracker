@@ -1,3 +1,6 @@
+export const dynamicParams = true;   // ★必須
+export const runtime = 'nodejs';     // Turbopack でも安定（任意）
+
 // Next.jsのレスポンスを返すAPI
 import { NextResponse } from 'next/server';
 // Prisma ORMのインスタンスをインポート
@@ -5,10 +8,11 @@ import { prisma } from '@/lib/prisma';
 // zodを使った日付けパラメータ用バリデーションスキーマをインポート
 import { dateParam } from '@/lib/validators';
 
-export async function PUT(req: Request, context : { params: { taskId: string; date: string } }) {
+type Params = { taskId: string; date: string };
+
+export async function PUT(req: Request, context : { params: Record<string, string> }) {
     // タスクIDと日付けを取得
-    const params = await Promise.resolve(context.params);
-    const { taskId, date } = params;
+    const { taskId, date } = context.params as Params;
 
     // リクエストボディをJSON形式で取得
     const { checked } = await req.json();        // { checked: true/false }
