@@ -6,11 +6,12 @@ import { NextRequest,NextResponse } from 'next/server';
 // Prisma ORMのインスタンスをインポート
 import { prisma } from '@/lib/prisma';
 // zodを使った日付けパラメータ用バリデーションスキーマをインポート
-import { dateParam } from '@/lib/validators';
+import { dateParam } from '@/lib/validators'; 
 
 type Params = { taskId: string; date: string };
+type Context = { params: Params };
 
-export async function PUT(req: NextRequest, context : { params: Params }) {
+export async function PUT(req: NextRequest, context : Context) {
     // タスクIDと日付けを取得
     const { taskId, date } = context.params;
 
