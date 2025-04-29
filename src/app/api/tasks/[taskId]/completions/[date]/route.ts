@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma';
 // zodを使った日付けパラメータ用バリデーションスキーマをインポート
 import { dateParam } from '@/lib/validators';
 
-export async function PUT(req: Request,{ params }: { params: { taskId: string; date: string } }) {
+export async function PUT(req: Request, context : { params: { taskId: string; date: string } }) {
     // タスクIDと日付けを取得
+    const params = await Promise.resolve(context.params);
     const { taskId, date } = params;
 
     // リクエストボディをJSON形式で取得
