@@ -10,10 +10,9 @@ import { dateParam } from '@/lib/validators';
 // 追加バリデーション用
 import { z } from 'zod';
 
-export async function GET(_req: Request, context: { params: { taskId: string }}) {
+export async function GET(_req: Request, { params }: { params: Promise<{ taskId: string }>}) {
     // タスクIDを取得
-    const params = await Promise.resolve(context.params);
-    const { taskId } = params;
+    const taskId = (await params).taskId;
 
     // /api/tasks/1/completions?from=2025-04-01&to=2025-04-30 のような日付範囲を取得
     // 1. URL オブジェクトを生成
