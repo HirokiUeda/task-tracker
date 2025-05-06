@@ -33,6 +33,8 @@ export default function TaskList() {
     // percentは完了したタスクの割合を計算
     const percent = (completedCount / tasks.length) * 100;
 
+    const [streak, setStreak] = useState<Record<number, number>>({}); // { taskId: 連続⽇数 }
+
     // タスクを取得するためのuseEffectフック
     // コンポーネントがマウントされたときに実行される
     useEffect(() => {
@@ -62,10 +64,26 @@ export default function TaskList() {
                   return [task.id, dates.length > 0] as const;
                 })
             );
-
             // 返って来たタプル配列 → オブジェクトへ
             // [ [1, true], [2, false] ] → { 1: true, 2: false }
             setDoneToday(Object.fromEntries(status));
+
+            // 連続日数を取得
+            const streakTuples = await Promise.all(
+                list.map(async (task) => {
+                  const r = await fetch(`/api/tasks/${task.id}/streak`);
+                  if (!r.ok) return [task.id, 0] as const;
+                  const { streak } = await r.json(); // { streak: number }
+                //   const data = await r.json();
+                //   console.log('streak API:', data); // 取得したデータをログに出力
+                  return [task.id, streak] as const; // [id, streak日数]
+                })
+              );
+            
+            // 返って来たタプル配列 → オブジェクトへ
+            // [ [1, 3], [2, 5] ] → { 1: 3, 2: 5 }
+            console.log('streak API:', streakTuples); // 取得したデータをログに出力
+            setStreak(Object.fromEntries(streakTuples));
 
           } catch (e) {
             // エラーが発生した場合はerrorステートにセット
@@ -75,6 +93,7 @@ export default function TaskList() {
             setLoading(false);
           }
         })();
+        
     }, []);
 
     // タスクを追加するための関数
@@ -153,6 +172,13 @@ export default function TaskList() {
                         onChange={(e) => toggleComplete(task.id, e.target.checked)}
                     />
                     <span>{task.name}</span>
+
+                    {/* ② 30日連続達成なら祝メッセージを表示 */}
+                    {streak[task.id] >= 30 && (
+                        <p className="text-xs text-blue-600 pl-6">
+                        🎉 30日連続達成！
+                        </p>
+                    )}
                 </li>
                 ))}
 
@@ -193,6 +219,8 @@ export default function TaskList() {
             <p className="text-xs text-gray-600 mb-4">
                 {completedCount} / {total}
             </p>
+
+            
         </div>
     );
 }
