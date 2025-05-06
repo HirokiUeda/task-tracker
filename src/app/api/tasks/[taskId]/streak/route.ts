@@ -18,7 +18,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ taskId:
     });
 
     let streak = 0;
-    let cursor = day(new Date()); // 今日
+    const cursor = day(new Date()); // 今日
 
     for (const { date } of dates) {
         if (day(date).getTime() === cursor.getTime()) {
