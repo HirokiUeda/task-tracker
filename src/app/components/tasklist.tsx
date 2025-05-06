@@ -29,6 +29,7 @@ export default function TaskList() {
 
     // completedCountは完了したタスクの数をカウント
     const completedCount = tasks.filter(t => doneToday[t.id]).length;
+    const total = tasks.length; // タスクの総数
     // percentは完了したタスクの割合を計算
     const percent = (completedCount / tasks.length) * 100;
 
@@ -51,16 +52,19 @@ export default function TaskList() {
                 list.map(async (task) => {
                   const r = await fetch(
                     // タスクの完了状態を取得するAPIを呼び出す
+                    // Completionテーブルのdateが、本日日付のものを取得
                     `/api/tasks/${task.id}/completions?from=${todayStr}&to=${todayStr}`
                   );
 
                   if (!r.ok) return [task.id, false] as const;
                   const dates: string[] = await r.json(); // ["2025-05-06"] or []
+                  // [task.id, 完了しているか(true/false)]のタプルを返す
                   return [task.id, dates.length > 0] as const;
                 })
             );
 
             // 返って来たタプル配列 → オブジェクトへ
+            // [ [1, true], [2, false] ] → { 1: true, 2: false }
             setDoneToday(Object.fromEntries(status));
 
           } catch (e) {
@@ -144,6 +148,7 @@ export default function TaskList() {
                     <input 
                         type="checkbox" 
                         // 完了状態を管理するためのチェックボックス
+                        // {1: true, 2: false} の形で管理
                         checked={!!doneToday[task.id]}
                         onChange={(e) => toggleComplete(task.id, e.target.checked)}
                     />
@@ -179,10 +184,15 @@ export default function TaskList() {
             </div>
 
             {/* 進捗バー */}
-            <div className="w-full bg-gray-200 h-2 rounded">
-                <div className="bg-blue-500 h-2 rounded" style={{ width: `${percent}%` }} />
+            <div className="w-full bg-gray-200 h-2 rounded mb-1">
+                <div
+                    className="bg-blue-500 h-2 rounded transition-all"
+                    style={{ width: `${percent}%` }}
+                />
             </div>
-            <p className="text-xs">{completedCount} / {tasks.length}</p>
+            <p className="text-xs text-gray-600 mb-4">
+                {completedCount} / {total}
+            </p>
         </div>
     );
 }
